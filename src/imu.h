@@ -22,7 +22,6 @@ void imu_setup() {
   Wire.begin();
   mpu.initialize();
   calibrateGyro();
-  delay(100);
 }
 
 IMU get_angle() {
@@ -48,8 +47,6 @@ IMU get_angle() {
   angleX = alpha * (angleX + gyroXrate * dt) + (1 - alpha) * accAngleX;
   angleY = alpha * (angleY + gyroYrate * dt) + (1 - alpha) * accAngleY;
 
-  delay(10); // Adjust delay as needed for your application
-
   return {angleX, angleY};
 }
 
@@ -62,7 +59,6 @@ void calibrateGyro() {
     mpu.getRotation(&gx, &gy, &gz);
     gyroXSum += gx;
     gyroYSum += gy;
-    delay(3);
   }
 
   gyroXoffset = gyroXSum / numReadings;

@@ -10,6 +10,6 @@ struct PID
 
 float kp = 0, kv = 0, ki = 0;
 
-PID calculate_pid(float pitch, float roll, int throttle){
+PID calculate_pid(float pitch, float roll, int desire_pitch, int desire_roll, int throttle){
     
 }
