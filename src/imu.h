@@ -9,6 +9,8 @@ float accAngleX, accAngleY, gyroAngleX, gyroAngleY, angleX, angleY;
 float gyroXoffset = 0.0, gyroYoffset = 0.0;
 float alpha = 0.98;  // Complementary filter coefficient
 
+float angleXoffset = 0.0, angleYoffset = 0.0;
+
 struct IMU
 {
   float pitch;
@@ -17,14 +19,17 @@ struct IMU
 
 
 void calibrateGyro();
+void calculate_angle();
+void calibrate_angle();
 
 void imu_setup() {
   Wire.begin();
   mpu.initialize();
   calibrateGyro();
+  calibrate_angle();
 }
 
-IMU get_angle() {
+void calculate_angle(){
   unsigned long currentTime = millis();
   dt = (currentTime - previousTime) / 1000.0;
   previousTime = currentTime;
@@ -46,8 +51,11 @@ IMU get_angle() {
   // Complementary filter to combine accelerometer and gyroscope values
   angleX = alpha * (angleX + gyroXrate * dt) + (1 - alpha) * accAngleX;
   angleY = alpha * (angleY + gyroYrate * dt) + (1 - alpha) * accAngleY;
+}
 
-  return {angleX, angleY};
+IMU get_angle() {
+  calculate_angle();
+  return {angleX-angleXoffset, angleY-angleYoffset};
 }
 
 void calibrateGyro() {
@@ -63,4 +71,20 @@ void calibrateGyro() {
 
   gyroXoffset = gyroXSum / numReadings;
   gyroYoffset = gyroYSum / numReadings;
+}
+
+void calibrate_angle(){
+  int numReadings = 1000;
+  long angleXSum = 0, angleYSum = 0;
+
+  for (int i = 0; i < numReadings; i++) {
+    calculate_angle();
+    float angleXcurrent = angleX;
+    float angleYcurrent = angleY;
+    angleXSum += angleXcurrent;
+    angleYSum += angleYcurrent;
+  }
+
+  angleXoffset = angleXSum / numReadings;
+  angleYoffset = angleYSum / numReadings;
 }
